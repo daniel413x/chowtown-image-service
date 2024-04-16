@@ -1,0 +1,29 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: [
+      'build',
+      '-t', 'gcr.io/$_GCP_PROJECT_ID/$_SERVICE_NAME:$_IMAGE_V',
+      '--build-arg', 'API_SVC_ADDRESS=$_API_SVC_ADDRESS',
+      '--build-arg', 'AUTH0_AUDIENCE=$_AUTH0_AUDIENCE',
+      '--build-arg', 'AUTH0_ISSUER_BASE_URL=$_AUTH0_ISSUER_BASE_URL',
+      '--build-arg', 'CLOUDINARY_API_SECRET=$_CLOUDINARY_API_SECRET',
+      '--build-arg', 'CLOUDINARY_API_KEY=$_CLOUDINARY_API_KEY',
+      '--build-arg', 'CLOUDINARY_URL=$_CLOUDINARY_URL',
+      '--build-arg', 'CLOUDINARY_CLOUD_NAME=$_CLOUDINARY_CLOUD_NAME',
+      '.'
+    ]
+  - name: gcr.io/cloud-builders/docker
+    args: ['push', 'gcr.io/$_GCP_PROJECT_ID/$_SERVICE_NAME:$_IMAGE_V']
+  - name: gcr.io/cloud-builders/gcloud
+    args: [
+      'run',
+      'deploy',
+      '$_SERVICE_NAME-$_IMAGE_V',
+      '--image',
+      'gcr.io/$_GCP_PROJECT_ID/$_SERVICE_NAME:$_IMAGE_V',
+      '--region', 'us-east1',
+      '--platform', 'managed',
+      '--port=$_PORT',
+      '--set-env-vars=API_SVC_ADDRESS=$_API_SVC_ADDRESS,AUTH0_AUDIENCE=$_AUTH0_AUDIENCE,AUTH0_ISSUER_BASE_URL=$_AUTH0_ISSUER_BASE_URL,CLOUDINARY_API_SECRET=$_CLOUDINARY_API_SECRET,CLOUDINARY_API_KEY=$_CLOUDINARY_API_KEY,CLOUDINARY_URL=$_CLOUDINARY_URL,CLOUDINARY_CLOUD_NAME=$_CLOUDINARY_CLOUD_NAME',
+      '--allow-unauthenticated',
+    ]
